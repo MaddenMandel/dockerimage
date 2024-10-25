@@ -1,4 +1,4 @@
-package com.maddenmandel.springboot.prometheus.grafana;
+package com.maddenmandel.springbootprometheusgrafana;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

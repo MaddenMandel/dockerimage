@@ -1,3 +1,14 @@
+spring:
+  application:
+    name: springboot-prometheus-grafana
 management:
-  security:
-    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    prometheus:
+      enabled: true
+
+server:
+  port: 8080

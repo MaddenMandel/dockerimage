@@ -1,4 +1,4 @@
-package com.maddenmandel.springboot.prometheus.grafana.controller;
+package com.maddenmandel.springbootprometheusgrafana.controller;
 
 import io.prometheus.client.spring.web.PrometheusTimeMethod;
 import org.springframework.web.bind.annotation.GetMapping;

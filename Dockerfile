@@ -1,5 +1,4 @@
-FROM maven:3.5.2-jdk-8-alpine
-ADD . /code
-WORKDIR /code
-RUN mvn clean package -DskipTests=true
-CMD mvn spring-boot:run
+FROM openjdk:17-jdk-slim
+VOLUME /tmp
+COPY target/springboot-prometheus-grafana-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
