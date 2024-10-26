@@ -1,6 +1,6 @@
 package com.maddenmandel.springbootprometheusgrafana.controller;
 
-import io.prometheus.client.spring.web.PrometheusTimeMethod;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
 
     @GetMapping("/hello")
-    @PrometheusTimeMethod(name = "hello_controller_say_hello_duration_seconds", help = "Some helpful info here")
+    @Timed(value = "hello_controller_say_hello_duration_seconds", description = "Time taken to return hello")
     public String sayHello() {
         return "hello";
     }
