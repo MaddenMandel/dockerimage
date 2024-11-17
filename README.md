@@ -11,7 +11,7 @@ Run application as follows.
 ```bash
 $ git clone https://github.com/MaddenMandel/springboot-prometheus-grafana.git
 $ cd springboot-prometheus-grafana
-$ docker-compose up -d
+
 ``` 
 
 Three applications are going to start.
