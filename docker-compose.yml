@@ -15,12 +15,18 @@ services:
       - ./env/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
+    depends_on:
+      - alertmanager
+      - node_exporter
+      - promtail
 
   grafana:
     image: grafana/grafana
     container_name: grafana
     ports:
       - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
 
   loki:
     image: grafana/loki:2.9.0
@@ -32,3 +38,27 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     environment:
       - LOKI_STORAGE_PATH=/loki
+
+  promtail:
+    image: grafana/promtail:2.8.2
+    container_name: promtail
+    volumes:
+      - ./logs:/var/log
+      - ./env/promtail-config.yaml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./env/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      -config.file=/etc/alertmanager/alertmanager.yml
