@@ -1,0 +1,21 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname']
+  receiver: 'mail'
+
+receivers:
+  - name: 'mail'
+    email_configs:
+      - to: 'your-email@example.com'
+        from: 'prometheus@example.com'
+        smarthost: 'smtp.example.com:587'
+        auth_username: 'your-username'
+        auth_password: 'your-password'
+        require_tls: true
+        
+  - name: 'slack'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/your/webhook/url'
+        channel: '#alerts'

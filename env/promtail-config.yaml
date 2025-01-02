@@ -9,7 +9,6 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
     batchsize: 102400  # 降低批量大小 (字节)
     batchwait: 5s      # 增加批量发送间隔时间
-    max_retries: 10  # 设置最大重试次数
 
 scrape_configs:
   # 收集系统日志

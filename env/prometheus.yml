@@ -1,9 +1,29 @@
+global:
+  scrape_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+rule_files:
+  - "alert_rules.yml"
+
 scrape_configs:
   - job_name: 'springboot-app'
     scrape_interval: 5s
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['192.168.0.199:8080']
+      - targets: ['web:8080']
+
   - job_name: 'node_exporter'
     static_configs:
       - targets: [ 'node_exporter:9100' ]
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: [ 'localhost:9090' ]
+
+  - job_name: 'promtail'
+    static_configs:
+      - targets: ['promtail:3100']
