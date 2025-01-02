@@ -1,0 +1,46 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    batchsize: 102400  # 降低批量大小 (字节)
+    batchwait: 5s      # 增加批量发送间隔时间
+    max_retries: 10  # 设置最大重试次数
+
+scrape_configs:
+  # 收集系统日志
+  - job_name: system_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system_logs                  # 自定义 Job 名称
+          host: "{{ hostname }}"            # 动态添加主机名
+          environment: production           # 自定义环境标签
+          __path__: /var/log/*.log          # 监控的日志路径
+
+  # 收集应用日志
+  - job_name: application_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: application_logs             # 自定义 Job 名称
+          app: my_app                       # 应用名称
+          environment: production           # 自定义环境标签
+          __path__: /var/log/app/*.log      # 应用日志路径
+
+  # 收集微服务日志
+  - job_name: microservices_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices_logs           # 自定义 Job 名称
+          service: auth-service             # 微服务名称
+          environment: staging              # 环境
+          __path__: /var/log/microservices/*.log
