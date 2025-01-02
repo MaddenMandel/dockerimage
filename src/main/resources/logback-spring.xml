@@ -4,7 +4,14 @@
 
     <appender name="PROMETHEUS" class="io.prometheus.client.logback.InstrumentedAppender"/>
 
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="net.logstash.logback.layout.LogstashLayout"/>
+        </encoder>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="PROMETHEUS"/>
+        <appender-ref ref="JSON_CONSOLE"/>
     </root>
 </configuration>
