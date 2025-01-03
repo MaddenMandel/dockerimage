@@ -13,3 +13,9 @@ management:
     metrics:
       export:
         enabled: true
+
+logging:
+  level:
+    io.opentelemetry: DEBUG
+    io.opentelemetry.api: DEBUG
+    io.opentelemetry.sdk: DEBUG
