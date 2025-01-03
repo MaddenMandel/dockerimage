@@ -5,25 +5,51 @@ alerting:
   alertmanagers:
     - static_configs:
         - targets:
-            - 'alertmanager:9093'
-rule_files:
-  - "alert_rules.yml"
+            - alertmanager:9093
 
 scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+
+  - job_name: 'promtail'
+    static_configs:
+      - targets: ['promtail:9080']
+      - labels:
+          job: varlogs
+          __path__: /var/log/*.log
+
   - job_name: 'springboot-app'
     scrape_interval: 5s
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['web:8080']
+      - targets: [ 'web:8080','192.168.18.241:8087']
 
   - job_name: 'node_exporter'
     static_configs:
       - targets: [ 'node_exporter:9100' ]
 
-  - job_name: 'prometheus'
+  - job_name: "服务器监控"
     static_configs:
-      - targets: [ 'localhost:9090' ]
+      - targets: ["192.168.18.68:9100","192.168.18.69:9100",
+                  "192.168.18.7:9100","192.168.18.9:9100","192.168.18.58:9100",
+                  "192.168.18.70:9100","192.168.18.71:9100",
+                  "192.168.18.73:9100","192.168.18.229:9100",
+                  "192.168.18.78:9100","192.168.18.230:9100","192.168.18.234:9100","192.168.18.235:9100","192.168.18.236:9100","192.168.18.237:9100",
+                  "192.168.18.113:9100","192.168.18.241:9100","192.168.18.50:9100","192.168.18.49:9100","192.168.18.231:9100","192.168.18.232:9100",
+                  "192.168.18.233:9100","192.168.18.72:9100","192.168.18.215:9111"]
 
-  - job_name: 'promtail'
+  - job_name: '应用监控'
+    metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['promtail:3100']
+      - targets: ["192.168.18.241:8087","192.168.18.241:8082"]
+rule_files:
+  - "rules/*.yml"

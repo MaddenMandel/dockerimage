@@ -6,15 +6,19 @@ server:
 
 ingester:
   lifecycler:
+    zone: us-east-1
     address: 127.0.0.1
     ring:
       kvstore:
         store: inmemory
       replication_factor: 1
     final_sleep: 0s
+
   chunk_idle_period: 5m
   chunk_retain_period: 30s
   max_transfer_retries: 0
+  chunk_target_size: 1048576
+  max_chunk_age: 1h
 
 schema_config:
   configs:
@@ -38,12 +42,12 @@ limits_config:
   enforce_metric_name: false
   reject_old_samples: true
   reject_old_samples_max_age: 168h
-  ingestion_rate_mb: 10        # 每秒写入 10 MB
-  ingestion_burst_size_mb: 100  # 突发写入最大 100 MB
+  ingestion_rate_mb: 500
+  ingestion_burst_size_mb: 1000
 
 chunk_store_config:
   max_look_back_period: 0s
 
 table_manager:
-  retention_deletes_enabled: true     # 启用删除过期日志
-  retention_period: 72h              # 设置日志保留时长为 72 小时，即 3 天
+  retention_deletes_enabled: true
+  retention_period: 72h

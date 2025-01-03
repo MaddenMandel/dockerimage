@@ -1,21 +1,32 @@
 global:
   resolve_timeout: 5m
+  smtp_smarthost: 'smtp.163.com:25'
+  smtp_from: 'zhutao2014@163.com'
+  smtp_auth_username: 'zhutao2014@163.com'
+  smtp_auth_password: 'GSFYPHEZNWSBMXHH'
+  smtp_require_tls: false
 
 route:
   group_by: ['alertname']
-  receiver: 'mail'
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 3m #重复问题，等待5分钟再告警一次
+  receiver: 'web.hook'
+
+  routes:
+    - match:
+        severity: 'critical'
+      receiver: 'slack'
 
 receivers:
-  - name: 'mail'
+  - name: 'web.hook'
     email_configs:
-      - to: 'your-email@example.com'
-        from: 'prometheus@example.com'
-        smarthost: 'smtp.example.com:587'
-        auth_username: 'your-username'
-        auth_password: 'your-password'
-        require_tls: true
-        
-  - name: 'slack'
-    slack_configs:
-      - api_url: 'https://hooks.slack.com/services/your/webhook/url'
-        channel: '#alerts'
+      - to: 'zhangxuegang@gmail.com'
+    webhook_configs:
+      - url: 'http://localhost:8060/dingtalk/webhook/send'
+        #inhibit_rules:
+        #- source_match:
+        # severity: 'critical'
+        #target_match:
+        # severity: 'warning'
+        #equal: ['alertname', 'dev', 'instance']
