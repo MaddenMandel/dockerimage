@@ -1,11 +1,126 @@
 groups:
-  - name: example_alerts
+  - name: 服务器资源监控
     rules:
-      - alert: HighCPUUsage
-        expr: node_cpu_seconds_total{mode="idle"} < 0.1
+      - alert: 内存使用率过高
+        expr: 100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 98
+        for: 3m
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: "{{ $labels.instance }} 内存使用率过高, 请尽快处理！"
+          description: "{{ $labels.instance }}内存使用率超过80%,当前使用率{{ $value }}%."
+
+      - alert: 服务器宕机
+        expr: up == 0
+        for: 1s
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: "{{$labels.instance}} 服务器宕机, 请尽快处理!"
+          description: "{{$labels.instance}} 服务器延时超过3分钟,当前状态{{ $value }}. "
+
+      - alert: CPU高负荷
+        expr: 100 - (avg by (instance,job)(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
         for: 5m
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: "{{$labels.instance}} CPU使用率过高,请尽快处理！"
+          description: "{{$labels.instance}} CPU使用大于90%,当前使用率{{ $value }}%. "
+
+      - alert: 磁盘IO性能
+        expr: avg(irate(node_disk_io_time_seconds_total[1m])) by(instance,job)* 100 > 90
+        for: 5m
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: "{{$labels.instance}} 流入磁盘IO使用率过高,请尽快处理！"
+          description: "{{$labels.instance}} 流入磁盘IO大于90%,当前使用率{{ $value }}%."
+
+
+      - alert: 网络流入
+        expr: ((sum(rate (node_network_receive_bytes_total{device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[5m])) by (instance,job)) / 100) > 102400
+        for: 5m
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: "{{$labels.instance}} 流入网络带宽过高，请尽快处理！"
+          description: "{{$labels.instance}} 流入网络带宽持续5分钟高于100M. RX带宽使用量{{$value}}."
+
+      - alert: 网络流出
+        expr: ((sum(rate (node_network_transmit_bytes_total{device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[5m])) by (instance,job)) / 100) > 102400
+        for: 5m
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: "{{$labels.instance}} 流出网络带宽过高,请尽快处理！"
+          description: "{{$labels.instance}} 流出网络带宽持续5分钟高于100M. RX带宽使用量{$value}}."
+
+      - alert: TCP连接数
+        expr: node_netstat_Tcp_CurrEstab > 10000
+        for: 2m
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: " TCP_ESTABLISHED过高！"
+          description: "{{$labels.instance}} TCP_ESTABLISHED大于100%,当前使用率{{ $value }}%."
+
+      - alert: 磁盘容量
+        expr: 100-(node_filesystem_free_bytes{fstype=~"ext4|xfs"}/node_filesystem_size_bytes {fstype=~"ext4|xfs"}*100) > 90
+        for: 1m
+        labels:
+          severity: 严重告警
+        annotations:
+          summary: "{{$labels.mountpoint}} 磁盘分区使用率过高，请尽快处理！"
+          description: "{{$labels.instance}} 磁盘分区使用大于90%，当前使用率{{ $value }}%."
+
+  - name: 应用性能监控
+    rules:
+      # 接口发生异常时触发告警
+      - alert: 接口异常发生
+        expr: sum(rate(http_server_requests_seconds_max{exception!="none"}[5m])) by (uri, exception) > 0
+        for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "High CPU usage detected"
-          description: "CPU usage is above 90% for more than 5 minutes."
+          summary: "{{ $labels.uri }} 接口发生异常"
+          description: "{{ $labels.uri }} 接口在过去 5 分钟内发生了异常，异常类型为 {{ $labels.exception }}，异常次数为 {{ $value }}。"
+
+      # HTTP 响应时间过高
+      - alert: HTTP响应时间过高
+        expr: http_server_requests_seconds_max > 3
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.uri }} HTTP 响应时间过高"
+          description: "{{ $labels.uri }} 的最大响应时间超过 1 秒，当前值为 {{ $value }} 秒。"
+
+      # HTTP 错误率过高
+      - alert: HTTP错误率过高
+        expr: sum(rate(http_server_requests_seconds_max{status=~"5.."}[5m])) by (uri) / sum(rate(http_server_requests_seconds_max[5m])) by (uri) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.uri }} HTTP 错误率过高"
+          description: "{{ $labels.uri }} 的错误率超过 10%，当前值为 {{ $value }}。"
+
+      # 异常次数超过 3 次时触发告警
+      - alert: RuntimeException 异常次数过高
+        expr: sum(increase(http_server_requests_seconds_count{exception="RuntimeException", outcome="SERVER_ERROR", status="500", application="uw-image-recognition", method="GET", uri="/underwriting/api/anaylsis/resultsByDateRange"}[5m])) by (uri) > 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.uri }} 接口发生异常次数过高"
+          description: "{{ $labels.uri }} 接口在过去 5 分钟内发生了超过 3 次的 RuntimeException 异常，当前异常次数为 {{ $value }}。"
+
+      - alert: RuntimeException 异常次数过高
+        expr: sum(increase(http_server_requests_seconds_count{exception="RuntimeException", outcome="SERVER_ERROR", status="500", application="underwriting-bigdata", method="GET", uri="/underwriting/api/customer/calculate"}[5m])) by (uri) > 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.uri }} 接口发生异常次数过高"
+          description: "{{ $labels.uri }} 接口在过去 5 分钟内发生了超过 3 次的 RuntimeException 异常，当前异常次数为 {{ $value }}。"
