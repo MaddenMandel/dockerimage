@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 15s
+  scrape_interval: 5s
 
 alerting:
   alertmanagers:
@@ -52,13 +52,11 @@ scrape_configs:
     static_configs:
       - targets: ["192.168.18.241:8087","192.168.18.241:8082"]
 
-  - job_name: 'jaeger'
-    static_configs:
-      - targets: [ 'jaeger:5778' ]
-
   - job_name: 'otel-collector'
+    scrape_interval: 10s
     static_configs:
-      - targets: [ 'opentelemetry-collector:4317' ]
+        - targets: [ 'otel-collector:8889' ]
+        - targets: [ 'otel-collector:8888' ]
 
 rule_files:
   - "rules/*.yml"
