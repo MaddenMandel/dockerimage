@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-prometheus-grafana-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-prometheus-grafana-web
+  template:
+    metadata:
+      labels:
+        app: springboot-prometheus-grafana-web
+    spec:
+      containers:
+        - name: springboot-prometheus-grafana-web
+          image: unionstars/springboot-prometheus-grafana-web:latest
+          ports:
+            - containerPort: 8080

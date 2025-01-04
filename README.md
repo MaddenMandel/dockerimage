@@ -53,3 +53,14 @@ Refer to [Prometheus documenatation](https://prometheus.io/docs/introduction/ove
 |`/prometheus`| Display metrics for prometheus. |
 |`/hello`| Return `hello`. The durations of process are collected as metrics named `hello_controller_say_hello_duration_seconds_count`,`hello_controller_say_hello_duration_seconds_sum`. |
 |`/count`| Return count of requests. The count of request is collected as metrics named `count_requests_total`.|
+
+# Use the K8S
+```bash
+docker build -t springboot-prometheus-grafana-web .
+docker tag springboot-prometheus-grafana-web:latest unionstars/springboot-prometheus-grafana-web:latest
+docker push unionstars/springboot-prometheus-grafana-web:latest
+kubectl apply -f springboot-prometheus-grafana-web-deployment.yaml
+kubectl apply -f springboot-prometheus-grafana-web-service.yaml
+minikube service springboot-prometheus-grafana-web-service
+```
+
